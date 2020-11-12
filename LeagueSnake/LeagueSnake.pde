@@ -5,17 +5,15 @@
 
 class Segment {
 
-//Add x and y member variables. They will hold the corner location of each segment of the snake.
-int x;
-int y;
+  //Add x and y member variables. They will hold the corner location of each segment of the snake.
+  int x;
+  int y;
 
-// Add a constructor with parameters to initialize each variable.
-Segment(int x, int y){
-  this.x=x;
-  this.y=y;
-}
-
-
+  // Add a constructor with parameters to initialize each variable.
+  Segment(int x, int y) {
+    this.x=x;
+    this.y=y;
+  }
 }
 
 
@@ -28,6 +26,7 @@ int foodX;
 int foodY;
 int sDirection=UP;
 int foodEaten=0;
+ArrayList<Segment>sTail=new ArrayList<Segment>();
 
 //*
 // ***** SETUP METHODS *****
@@ -35,16 +34,17 @@ int foodEaten=0;
 //*
 
 void setup() {
-size(500,500);
-sHead = new Segment(100,100);
-frameRate(20);
-dropFood();
+  size(500, 500);
+  sHead = new Segment(100, 100);
+  frameRate(20);
+  dropFood();
+  frameRate(20);
 }
 
 void dropFood() {
   //Set the food in a new random location
-   foodX = ((int)random(50)*10);
-   foodY = ((int)random(50)*10);
+  foodX = ((int)random(50)*10);
+  foodY = ((int)random(50)*10);
 }
 
 
@@ -56,21 +56,23 @@ void dropFood() {
 
 void draw() {
   background(#080808);
-  //move();
+  move();
   drawFood();
   drawSnake();
+  eat();
 }
 
 void drawFood() {
   //Draw the food
   fill(#FF0505);
-  ellipse(foodX,foodY,10,10);
+  rect(foodX, foodY, 10, 10);
 }
 
 void drawSnake() {
   //Draw the head of the snake followed by its tail
   fill(#1FFF03);
-  rect(sHead.x,sHead.y,10,10);
+  rect(sHead.x, sHead.y, 10, 10);
+  manageTail();
 }
 
 
@@ -81,18 +83,30 @@ void drawSnake() {
 
 void drawTail() {
   //Draw each segment of the tail 
-
+  for (Segment s : sTail) {
+    rect(s.x, s.y, 10, 10);
+  }
 }
 
 void manageTail() {
   //After drawing the tail, add a new segment at the "start" of the tail and remove the one at the "end" 
   //This produces the illusion of the snake tail moving.
-  
+  checkTailCollision();
+  drawTail();
+  sTail.add(new Segment(sHead.x, sHead.y));
+  sTail.remove(0);
 }
 
 void checkTailCollision() {
   //If the snake crosses its own tail, shrink the tail back to one segment
-  
+  for (Segment s : sTail) {
+    if (sHead.x==s.x && sHead.y==s.y) {
+      foodEaten=0;
+      sTail=new ArrayList<Segment>();
+      sTail.add(new Segment(sHead.x, sHead.y));
+      return;
+    }
+  }
 }
 
 
@@ -104,60 +118,62 @@ void checkTailCollision() {
 
 void keyPressed() {
   //Set the direction of the snake according to the arrow keys pressed
-  if(keyCode==UP){
-   sDirection=keyCode; 
-  }
-    if(keyCode==DOWN){
-   sDirection=keyCode; 
-  }
-    if(keyCode==RIGHT){
-   sDirection=keyCode; 
-  }
-    if(keyCode==LEFT){
-   sDirection=keyCode; 
+  if (keyCode==UP) {
+    sDirection=UP;
+  } else if (keyCode==DOWN) {
+    sDirection=DOWN;
+  } else if (keyCode==RIGHT) {
+    sDirection=RIGHT;
+  } else if (keyCode==LEFT) {
+    sDirection=LEFT;
   }
 }
 
 void move() {
   //Change the location of the Snake head based on the direction it is moving.
-  
-    
+
+
   switch(sDirection) {
   case UP:
-    // move head up here 
+    sHead.y=sHead.y-10;// move head up here 
     break;
   case DOWN:
-    // move head down here 
+    sHead.y=sHead.y+10;// move head down here 
     break;
   case LEFT:
-   // figure it out 
+    sHead.x=sHead.x-10;// figure it out 
     break;
   case RIGHT:
-    // mystery code goes here 
+    sHead.x=sHead.x+10;// mystery code goes here 
     break;
   }
   checkBoundaries();
 }
 
 void checkBoundaries() {
- //If the snake leaves the frame, make it reappear on the other side
- if(sHead.x>width){
-  sHead.x = 0; 
- }
- if(sHead.x<width){
-  sHead.x = 500; 
- }
- if(sHead.y>height){
-  sHead.y=0; 
- }
-  if(sHead.y<height){
-  sHead.y=500; 
- }
+  //If the snake leaves the frame, make it reappear on the other side
+  if (sHead.x>width) {
+    sHead.x = width-width;
+  }
+  if (sHead.x<width-width) {
+    sHead.x = width;
+  }
+  if (sHead.y>height) {
+    sHead.y=height-height;
+  }
+  if (sHead.y<height-height) {
+    sHead.y=height;
+  }
 }
 
 
 
 void eat() {
   //When the snake eats the food, its tail should grow and more food appear
-
+  if (sHead.x==foodX && sHead.y==foodY) {
+    foodEaten+=1;
+    foodX = ((int)random(50)*10);
+    foodY = ((int)random(50)*10);
+    sTail.add(new Segment(sHead.x, sHead.y));
+  }
 }
